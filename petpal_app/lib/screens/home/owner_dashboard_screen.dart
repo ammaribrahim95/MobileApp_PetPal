@@ -280,15 +280,29 @@ class OwnerDashboardScreen extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-          child: Icon(
-            booking.type == BookingType.vet
-                ? Icons.medical_services
-                : Icons.home,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
+        leading: Builder(builder: (ctx) {
+          ImageProvider? petImage;
+          final url = booking.petImageUrl;
+          if (url != null && url.isNotEmpty) {
+            try {
+              final f = File(url);
+              if (f.existsSync()) petImage = FileImage(f);
+              else petImage = NetworkImage(url);
+            } catch (_) {
+              petImage = NetworkImage(url);
+            }
+          }
+          return CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundImage: petImage,
+            child: petImage == null
+                ? Icon(
+                    booking.type == BookingType.vet ? Icons.medical_services : Icons.home,
+                    color: Theme.of(context).primaryColor,
+                  )
+                : null,
+          );
+        }),
         title: Text(
           title,
           style: const TextStyle(fontWeight: FontWeight.bold),

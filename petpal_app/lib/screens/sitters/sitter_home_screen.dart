@@ -12,6 +12,25 @@ import '../../widgets/primary_button.dart';
 class SitterHomeScreen extends StatelessWidget {
   const SitterHomeScreen({super.key});
 
+  static ImageProvider? _imageProviderFromUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme == 'file') {
+        final path = uri.toFilePath();
+        final f = File(path);
+        if (f.existsSync()) return FileImage(f) as ImageProvider;
+        return null;
+      }
+    } catch (_) {}
+    try {
+      final f = File(url);
+      if (f.existsSync()) return FileImage(f) as ImageProvider;
+    } catch (_) {}
+    if (url.startsWith('http://') || url.startsWith('https://')) return NetworkImage(url);
+    return null;
+  }
+
   void _showProfileMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -173,8 +192,8 @@ class SitterHomeScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: Colors.grey[200],
-            backgroundImage: booking.petImageUrl != null ? NetworkImage(booking.petImageUrl!) : null,
-            child: booking.petImageUrl == null ? Text(booking.petName[0]) : null,
+            backgroundImage: _imageProviderFromUrl(booking.petImageUrl),
+            child: _imageProviderFromUrl(booking.petImageUrl) == null ? Text(booking.petName[0]) : null,
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -70,10 +70,21 @@ class BookingRepository {
       data['rejectionReason'] = booking.rejectionReason;
     }
 
-    await _firestoreService.setDocument(
-      collection: collection,
-      docId: booking.id,
-      data: data,
-    );
+    if (_firestoreService == null) {
+      // defensive: shouldn't happen, but guard
+      return;
+    }
+    try {
+      await _firestoreService.setDocument(
+        collection: collection,
+        docId: booking.id,
+        data: data,
+      );
+    } catch (e) {
+      // Log for debugging
+      // ignore: avoid_print
+      print('Failed to update booking status for ${booking.id}: $e');
+      rethrow;
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/booking.dart';
@@ -77,6 +78,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   ) async {
     emit(state.copyWith(isLoading: true));
     try {
+      if (kDebugMode) {
+        debugPrint('BookingStatusUpdated called for id=${event.booking.id} status=${event.status}');
+      }
       await _bookingRepository.updateStatus(
         booking: event.booking,
         status: event.status,

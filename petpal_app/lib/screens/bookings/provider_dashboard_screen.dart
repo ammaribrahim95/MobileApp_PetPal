@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +37,26 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
             ProviderBookingsRequested(userId: user.id, role: user.role),
           );
     }
+  }
+
+  ImageProvider? _petImageProvider(Booking booking, Pet? pet) {
+    final url = booking.petImageUrl ?? pet?.imageUrl;
+    if (url == null || url.isEmpty) return null;
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme == 'file') {
+        final path = uri.toFilePath();
+        final f = File(path);
+        if (f.existsSync()) return FileImage(f) as ImageProvider;
+        return null;
+      }
+    } catch (_) {}
+    try {
+      final f = File(url);
+      if (f.existsSync()) return FileImage(f) as ImageProvider;
+    } catch (_) {}
+    if (url.startsWith('http://') || url.startsWith('https://')) return NetworkImage(url);
+    return null;
   }
 
   Future<void> _loadBookingData(List<Booking> bookings) async {
@@ -270,6 +291,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   Widget _buildPendingCard(Booking booking) {
     final pet = _petCache[booking.petId];
     final owner = _ownerCache[booking.ownerId];
+    final image = _petImageProvider(booking, pet);
     
     return Container(
       width: 320,
@@ -295,8 +317,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           Row(
             children: [
               CircleAvatar(
+                radius: 28,
+                backgroundImage: image,
                 backgroundColor: Colors.orange[100],
-                child: const Icon(Icons.pets, color: Colors.orange),
+                child: image == null ? const Icon(Icons.pets, color: Colors.orange) : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -399,6 +423,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
   Widget _buildUpcomingCard(Booking booking) {
     final pet = _petCache[booking.petId];
     final owner = _ownerCache[booking.ownerId];
+    final image = _petImageProvider(booking, pet);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -431,7 +456,14 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                ],
              ),
            ),
-           const SizedBox(width: 16),
+           const SizedBox(width: 12),
+           CircleAvatar(
+             radius: 28,
+             backgroundImage: image,
+             backgroundColor: Colors.blue[50],
+             child: image == null ? const Icon(Icons.pets, color: Colors.blue) : null,
+           ),
+           const SizedBox(width: 12),
            Expanded(
              child: Column(
                mainAxisSize: MainAxisSize.min,

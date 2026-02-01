@@ -15,30 +15,28 @@ class VetDetailScreen extends StatelessWidget {
   static const routeName = '/vets/detail';
 
   Widget _buildAvatar(AppUser vet, BuildContext context) {
-    return Center(
-      child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) {
-          final currentId = authState.user?.id;
-          if (vet.id == currentId) {
-            return BlocBuilder<ProfileBloc, ProfileState>(
-              builder: (context, pstate) {
-                final local = pstate.localProfileImagePath;
-                if (local != null && local.isNotEmpty) {
-                  return CircleAvatar(radius: 48, backgroundImage: FileImage(File(local)));
-                }
-                if (vet.profileImageUrl != null) {
-                  return CircleAvatar(radius: 48, backgroundImage: NetworkImage(vet.profileImageUrl!));
-                }
-                return const CircleAvatar(radius: 48, child: Icon(Icons.person, size: 48));
-              },
-            );
-          }
-          if (vet.profileImageUrl != null) {
-            return CircleAvatar(radius: 48, backgroundImage: NetworkImage(vet.profileImageUrl!));
-          }
-          return const CircleAvatar(radius: 48, child: Icon(Icons.person, size: 48));
-        },
-      ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final currentId = authState.user?.id;
+        if (vet.id == currentId) {
+          return BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, pstate) {
+              final local = pstate.localProfileImagePath;
+              if (local != null && local.isNotEmpty) {
+                return CircleAvatar(radius: 40, backgroundImage: FileImage(File(local)));
+              }
+              if (vet.profileImageUrl != null) {
+                return CircleAvatar(radius: 40, backgroundImage: NetworkImage(vet.profileImageUrl!));
+              }
+              return const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40));
+            },
+          );
+        }
+        if (vet.profileImageUrl != null) {
+          return CircleAvatar(radius: 40, backgroundImage: NetworkImage(vet.profileImageUrl!));
+        }
+        return const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40));
+      },
     );
   }
 
@@ -115,33 +113,42 @@ class VetDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vet = ModalRoute.of(context)!.settings.arguments as AppUser;
+    final List<String>? specializations = (vet.specialization != null && vet.specialization!.isNotEmpty)
+        ? vet.specialization!.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList()
+        : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(vet.name)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _buildAvatar(vet, context),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAvatar(vet, context),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(vet.name, style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 6),
+                    Text(vet.clinicLocation ?? vet.address ?? 'Location not specified', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 8),
+                    // specialization will be shown below as chips to match sitter layout
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
-
-          Text(vet.specialization ?? 'General Practice', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 6),
-          Text(vet.clinicLocation ?? vet.address ?? 'Location not specified', style: Theme.of(context).textTheme.bodySmall),
-
-          const SizedBox(height: 12),
-          Text('Services', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          _buildChips(vet.servicesProvided),
-
-          const SizedBox(height: 12),
-          Text('Pet Types Accepted', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          _buildChips(vet.petTypesAccepted),
-
-          const SizedBox(height: 12),
-          Text('About / Bio', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Text(vet.experience ?? 'No bio available'),
+          // Specialization shown like sitter's services (as chips)
+          if (specializations != null && specializations.isNotEmpty) ...[
+            Text('Specialization', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            _buildChips(specializations),
+            const SizedBox(height: 12),
+          ],
 
           const SizedBox(height: 16),
           if (vet.hotelImageUrls != null && vet.hotelImageUrls!.isNotEmpty) ...[
@@ -164,9 +171,19 @@ class VetDetailScreen extends StatelessWidget {
           ],
 
           const SizedBox(height: 12),
-          Text('Schedule', style: Theme.of(context).textTheme.titleMedium),
+          Text('Availability', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          Text(vet.schedule ?? 'No schedule available'),
+          // Match sitter layout: show 'No availability' only when there is no structured availability.
+          if ((vet.availableDays ?? []).isEmpty && (vet.availableHours ?? {}).isEmpty) ...[
+            if (vet.schedule != null && vet.schedule!.isNotEmpty) Text(vet.schedule!) else const Text('No availability information'),
+          ],
+          if (vet.availableDays != null && vet.availableDays!.isNotEmpty) ...[
+            Wrap(spacing: 8, children: vet.availableDays!.map((d) => Chip(label: Text(d))).toList()),
+          ],
+          if (vet.availableHours != null && vet.availableHours!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...vet.availableHours!.entries.map((e) => Text('${e.key}: ${e.value}')),
+          ],
 
           const SizedBox(height: 20),
           Row(children: [

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/booking/booking_bloc.dart';
 import '../../models/app_user.dart';
+import '../../models/pet.dart';
+import '../../repositories/pet_repository.dart';
 import '../../models/booking.dart';
 import '../../utils/dialog_utils.dart';
 import 'sitter_profile_setup_screen.dart';
@@ -39,6 +42,50 @@ class _SitterDashboardScreenState extends State<SitterDashboardScreen> with Sing
         ProviderBookingsRequested(userId: user.id, role: user.role),
       );
     }
+  }
+
+  final Map<String, Pet> _petCache = {};
+  final Set<String> _ownersFetched = {};
+  bool _isLoadingData = false;
+
+  Future<void> _loadBookingData(List<Booking> bookings) async {
+    if (_isLoadingData) return;
+    setState(() => _isLoadingData = true);
+    final petRepo = context.read<PetRepository>();
+    for (final booking in bookings) {
+      if (!_ownersFetched.contains(booking.ownerId)) {
+        try {
+          final pets = await petRepo.fetchPets(booking.ownerId);
+          for (final pet in pets) {
+            _petCache[pet.id] = pet;
+          }
+        } catch (_) {}
+        _ownersFetched.add(booking.ownerId);
+      }
+    }
+    if (mounted) setState(() => _isLoadingData = false);
+  }
+
+  ImageProvider? _imageProviderFromUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme == 'file') {
+        final path = uri.toFilePath();
+        final f = File(path);
+        if (f.existsSync()) return FileImage(f) as ImageProvider;
+        return null;
+      }
+    } catch (_) {}
+    try {
+      final f = File(url);
+      if (f.existsSync()) return FileImage(f) as ImageProvider;
+    } catch (_) {}
+    // Only use NetworkImage for http/https
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return NetworkImage(url);
+    }
+    return null;
   }
   
   @override
@@ -133,10 +180,18 @@ class _SitterDashboardScreenState extends State<SitterDashboardScreen> with Sing
              ..sort((a,b) => a.date.compareTo(b.date));
           final upcoming = bookings.where((b) => b.status == BookingStatus.accepted).toList()
              ..sort((a,b) => a.date.compareTo(b.date));
+
+          
           final completed = bookings.where((b) => b.status == BookingStatus.completed).toList()
              ..sort((a,b) => b.date.compareTo(a.date)); // Newest first
           final rejected = bookings.where((b) => b.status == BookingStatus.rejected).toList()
              ..sort((a,b) => b.date.compareTo(a.date));
+
+          if ((pending.isNotEmpty || upcoming.isNotEmpty) && !_isLoadingData) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _loadBookingData([...pending, ...upcoming]);
+            });
+          }
 
           return TabBarView(
             controller: _tabController,
@@ -177,6 +232,9 @@ class _SitterDashboardScreenState extends State<SitterDashboardScreen> with Sing
   }
 
   Widget _buildBookingCard(Booking booking, bool isPending) {
+    final pet = _petCache[booking.petId];
+    final image = _imageProviderFromUrl(booking.petImageUrl ?? pet?.imageUrl);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -188,8 +246,9 @@ class _SitterDashboardScreenState extends State<SitterDashboardScreen> with Sing
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: booking.petImageUrl != null ? NetworkImage(booking.petImageUrl!) : null,
-                  child: booking.petImageUrl == null ? Text(booking.petName.isNotEmpty ? booking.petName[0] : '?') : null,
+                  radius: 24,
+                  backgroundImage: image,
+                  child: image == null ? Text(booking.petName.isNotEmpty ? booking.petName[0] : '?') : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -244,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, pState) {
         final currentUser = pState.user ?? context.read<AuthBloc>().state.user;
-        if (currentUser != null && currentUser.role == UserRole.sitter) {
+        if (currentUser != null && (currentUser.role == UserRole.sitter || currentUser.role == UserRole.vet)) {
           return const SizedBox.shrink();
         }
         return BlocBuilder<PetBloc, PetState>(

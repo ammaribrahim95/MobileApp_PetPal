@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 import '../../models/booking.dart';
 
@@ -8,6 +9,25 @@ class BookingSummaryScreen extends StatelessWidget {
   static const routeName = '/bookings/summary';
 
   final Booking booking;
+
+  ImageProvider? _imageProviderFromUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme == 'file') {
+        final path = uri.toFilePath();
+        final f = File(path);
+        if (f.existsSync()) return FileImage(f) as ImageProvider;
+        return null;
+      }
+    } catch (_) {}
+    try {
+      final f = File(url);
+      if (f.existsSync()) return FileImage(f) as ImageProvider;
+    } catch (_) {}
+    if (url.startsWith('http://') || url.startsWith('https://')) return NetworkImage(url);
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +47,7 @@ class BookingSummaryScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 36,
-                      backgroundImage: booking.petImageUrl != null
-                          ? NetworkImage(booking.petImageUrl!) as ImageProvider
-                          : const AssetImage('assets/images/pet_placeholder.png'),
+                      backgroundImage: _imageProviderFromUrl(booking.petImageUrl) ?? const AssetImage('assets/images/pet_placeholder.png'),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
