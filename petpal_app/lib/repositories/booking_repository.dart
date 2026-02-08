@@ -1,4 +1,3 @@
-
 import '../models/booking.dart';
 import '../services/firestore_service.dart';
 
@@ -68,11 +67,6 @@ class BookingRepository {
     final data = <String, dynamic>{'status': status.name};
     if (booking.rejectionReason != null) {
       data['rejectionReason'] = booking.rejectionReason;
-    }
-
-    if (_firestoreService == null) {
-      // defensive: shouldn't happen, but guard
-      return;
     }
     try {
       await _firestoreService.setDocument(

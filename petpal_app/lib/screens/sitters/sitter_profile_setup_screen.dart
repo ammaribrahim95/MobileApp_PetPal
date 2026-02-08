@@ -14,7 +14,8 @@ class SitterProfileSetupScreen extends StatefulWidget {
   static const routeName = '/sitter/setup';
 
   @override
-  State<SitterProfileSetupScreen> createState() => _SitterProfileSetupScreenState();
+  State<SitterProfileSetupScreen> createState() =>
+      _SitterProfileSetupScreenState();
 }
 
 class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
@@ -23,18 +24,31 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
   // Professional Info
   final _experienceDescController = TextEditingController();
   final _yearsExpController = TextEditingController();
-  
+
   // Lists
   final List<String> _petTypes = ['Dog', 'Cat', 'Rabbit', 'Bird', 'Other'];
   final List<String> _selectedPetTypes = [];
 
-  final List<String> _services = ['Day Care', 'Overnight Sitting', 'Home Visit', 'Boarding'];
+  final List<String> _services = [
+    'Day Care',
+    'Overnight Sitting',
+    'Home Visit',
+    'Boarding',
+  ];
   final List<String> _selectedServices = [];
 
   // Availability
-  final List<String> _daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _daysOfWeek = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
   final List<String> _selectedDays = [];
-  
+
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
 
@@ -53,23 +67,31 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    
+
     if (_selectedPetTypes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select at least one pet type')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select at least one pet type')),
+      );
       return;
     }
     if (_selectedServices.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select at least one service')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select at least one service')),
+      );
       return;
     }
-     if (_selectedDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select at least one available day')));
+    if (_selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select at least one available day')),
+      );
       return;
     }
-    
+
     final authState = context.read<AuthBloc>().state;
     if (authState.user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User not found. Please login again.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found. Please login again.')),
+      );
       return;
     }
 
@@ -86,11 +108,12 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
     );
 
     // Save to Firestore via Bloc
-    context.read<ProfileBloc>().add(ProfileUpdated(updatedUser)); 
+    context.read<ProfileBloc>().add(ProfileUpdated(updatedUser));
 
     // Navigate to Dashboard
     Navigator.pushReplacementNamed(context, HomeScreen.routeName);
   }
+
   void _toggleListItem(List<String> list, String item) {
     setState(() {
       if (list.contains(item)) {
@@ -108,8 +131,11 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
     );
     if (picked != null) {
       setState(() {
-        if (isStart) _startTime = picked;
-        else _endTime = picked;
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
       });
     }
   }
@@ -125,7 +151,7 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-               const Text(
+              const Text(
                 'Complete your profile with professional details.',
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
@@ -136,7 +162,8 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
                 controller: _experienceDescController,
                 label: 'Experience Description',
                 maxLines: 3,
-                validator: (v) => AppValidators.required(v, fieldName: 'Experience'),
+                validator: (v) =>
+                    AppValidators.required(v, fieldName: 'Experience'),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -146,42 +173,62 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
                 validator: (v) => AppValidators.required(v, fieldName: 'Years'),
               ),
               const SizedBox(height: 16),
-              
-              const Text('Pet Types Accepted', style: TextStyle(fontWeight: FontWeight.bold)),
+
+              const Text(
+                'Pet Types Accepted',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Wrap(
                 spacing: 8,
-                children: _petTypes.map((type) => FilterChip(
-                  label: Text(type),
-                  selected: _selectedPetTypes.contains(type),
-                  onSelected: (_) => _toggleListItem(_selectedPetTypes, type),
-                )).toList(),
+                children: _petTypes
+                    .map(
+                      (type) => FilterChip(
+                        label: Text(type),
+                        selected: _selectedPetTypes.contains(type),
+                        onSelected: (_) =>
+                            _toggleListItem(_selectedPetTypes, type),
+                      ),
+                    )
+                    .toList(),
               ),
               const SizedBox(height: 16),
 
-              const Text('Services Provided', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Services Provided',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Wrap(
                 spacing: 8,
-                children: _services.map((s) => FilterChip(
-                  label: Text(s),
-                  selected: _selectedServices.contains(s),
-                  onSelected: (_) => _toggleListItem(_selectedServices, s),
-                )).toList(),
+                children: _services
+                    .map(
+                      (s) => FilterChip(
+                        label: Text(s),
+                        selected: _selectedServices.contains(s),
+                        onSelected: (_) =>
+                            _toggleListItem(_selectedServices, s),
+                      ),
+                    )
+                    .toList(),
               ),
               const SizedBox(height: 24),
 
               _buildSectionTitle('Availability'),
               Wrap(
                 spacing: 8,
-                children: _daysOfWeek.map((d) => FilterChip(
-                  label: Text(d),
-                  selected: _selectedDays.contains(d),
-                  onSelected: (_) => _toggleListItem(_selectedDays, d),
-                )).toList(),
+                children: _daysOfWeek
+                    .map(
+                      (d) => FilterChip(
+                        label: Text(d),
+                        selected: _selectedDays.contains(d),
+                        onSelected: (_) => _toggleListItem(_selectedDays, d),
+                      ),
+                    )
+                    .toList(),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-// ... (Time pickers stay same)
+                  // ... (Time pickers stay same)
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => _selectTime(true),
@@ -197,7 +244,7 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
               PrimaryButton(label: 'Complete Registration', onPressed: _submit),
             ],
@@ -210,7 +257,10 @@ class _SitterProfileSetupScreenState extends State<SitterProfileSetupScreen> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }

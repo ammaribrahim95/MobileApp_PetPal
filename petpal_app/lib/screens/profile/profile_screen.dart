@@ -7,11 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/profile/profile_bloc.dart';
 import '../../models/app_user.dart';
-import '../../models/pet.dart';
-import '../../utils/app_validators.dart';
 import '../../blocs/pet/pet_bloc.dart';
-import '../../widgets/app_text_field.dart';
-import '../../widgets/primary_button.dart';
 import 'edit_profile_screen.dart'; // Added back
 
 class ProfileScreen extends StatefulWidget {
@@ -46,14 +42,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (authUser == null) return;
     final src = File(pickedPath);
     try {
-      final dest = File('${Directory.systemTemp.path}/petpal_profile_${authUser.id}.jpg');
+      final dest = File(
+        '${Directory.systemTemp.path}/petpal_profile_${authUser.id}.jpg',
+      );
       await src.copy(dest.path);
-      context.read<ProfileBloc>().add(ProfileLocalImageSet(path: dest.path, uid: authUser.id));
+      context.read<ProfileBloc>().add(
+        ProfileLocalImageSet(path: dest.path, uid: authUser.id),
+      );
     } catch (_) {
       // fallback to original path
-      context.read<ProfileBloc>().add(ProfileLocalImageSet(path: pickedPath, uid: authUser.id));
+      context.read<ProfileBloc>().add(
+        ProfileLocalImageSet(path: pickedPath, uid: authUser.id),
+      );
     }
-
   }
 
   void _openEditScreen(AppUser user) {
@@ -125,7 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             builder: (context, state) {
               return IconButton(
                 icon: const Icon(Icons.settings),
-                onPressed: state.user != null ? () => _openSettings(state.user!) : null,
+                onPressed: state.user != null
+                    ? () => _openSettings(state.user!)
+                    : null,
               );
             },
           ),
@@ -144,22 +147,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 // Use the ProfileBloc state passed into the builder so updates reliably rebuild
-                Builder(builder: (_) {
-                  final localPath = state.localProfileImagePath;
-                  ImageProvider? avatarImage;
-                  if (localPath != null && localPath.isNotEmpty) {
-                    avatarImage = FileImage(File(localPath));
-                  } else if (user.profileImageUrl != null) {
-                    avatarImage = NetworkImage(user.profileImageUrl!);
-                  }
-                  return CircleAvatar(
-                    radius: 48,
-                    backgroundImage: avatarImage,
-                    child: avatarImage == null
-                        ? const Icon(Icons.person, size: 48)
-                        : null,
-                  );
-                }),
+                Builder(
+                  builder: (_) {
+                    final localPath = state.localProfileImagePath;
+                    ImageProvider? avatarImage;
+                    if (localPath != null && localPath.isNotEmpty) {
+                      avatarImage = FileImage(File(localPath));
+                    } else if (user.profileImageUrl != null) {
+                      avatarImage = NetworkImage(user.profileImageUrl!);
+                    }
+                    return CircleAvatar(
+                      radius: 48,
+                      backgroundImage: avatarImage,
+                      child: avatarImage == null
+                          ? const Icon(Icons.person, size: 48)
+                          : null,
+                    );
+                  },
+                ),
                 TextButton.icon(
                   onPressed: _uploadImage,
                   icon: const Icon(Icons.upload),
@@ -199,15 +204,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             if (user.role == UserRole.vet) ...[
               const Divider(),
-              _buildInfoRow(Icons.medical_services, user.specialization ?? 'N/A', label: 'Specialization'),
+              _buildInfoRow(
+                Icons.medical_services,
+                user.specialization ?? 'N/A',
+                label: 'Specialization',
+              ),
               const Divider(),
-              _buildInfoRow(Icons.local_hospital, user.clinicLocation ?? 'N/A', label: 'Clinic'),
+              _buildInfoRow(
+                Icons.local_hospital,
+                user.clinicLocation ?? 'N/A',
+                label: 'Clinic',
+              ),
             ],
             if (user.role == UserRole.sitter) ...[
               const Divider(),
-              _buildInfoRow(Icons.work_history, user.experience ?? 'N/A', label: 'Experience'),
+              _buildInfoRow(
+                Icons.work_history,
+                user.experience ?? 'N/A',
+                label: 'Experience',
+              ),
               const Divider(),
-              _buildInfoRow(Icons.attach_money, user.pricing != null ? '\$${user.pricing}/hr' : 'N/A', label: 'Rate'),
+              _buildInfoRow(
+                Icons.attach_money,
+                user.pricing != null ? '\$${user.pricing}/hr' : 'N/A',
+                label: 'Rate',
+              ),
             ],
           ],
         ),
@@ -223,17 +244,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(width: 16),
         Expanded(
           child: Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             children: [
-               if (label != null) ...[
-                 Text(
-                   label,
-                   style: const TextStyle(fontSize: 12, color: Colors.grey),
-                 ),
-                 const SizedBox(height: 2),
-               ],
-               Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-             ],
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (label != null) ...[
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 2),
+              ],
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+            ],
           ),
         ),
       ],
@@ -244,7 +265,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, pState) {
         final currentUser = pState.user ?? context.read<AuthBloc>().state.user;
-        if (currentUser != null && (currentUser.role == UserRole.sitter || currentUser.role == UserRole.vet)) {
+        if (currentUser != null &&
+            (currentUser.role == UserRole.sitter ||
+                currentUser.role == UserRole.vet)) {
           return const SizedBox.shrink();
         }
         return BlocBuilder<PetBloc, PetState>(
@@ -260,7 +283,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/pets/form'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/pets/form'),
                       child: const Text('Add Pet'),
                     ),
                   ],
@@ -284,9 +308,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           leading: CircleAvatar(
                             radius: 20,
                             backgroundImage: () {
-                              if (pet.imageUrl != null && pet.imageUrl!.isNotEmpty) {
+                              if (pet.imageUrl != null &&
+                                  pet.imageUrl!.isNotEmpty) {
                                 final f = File(pet.imageUrl!);
-                                if (f.existsSync()) return FileImage(f) as ImageProvider;
+                                if (f.existsSync())
+                                  return FileImage(f) as ImageProvider;
                                 return NetworkImage(pet.imageUrl!);
                               }
                               return null;

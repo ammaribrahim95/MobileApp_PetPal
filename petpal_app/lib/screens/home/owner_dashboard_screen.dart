@@ -59,7 +59,7 @@ class OwnerDashboardScreen extends StatelessWidget {
 
   Widget _buildGreetingSection(BuildContext context) {
     final user = context.select((AuthBloc bloc) => bloc.state.user);
-    
+
     return Row(
       children: [
         Expanded(
@@ -68,31 +68,33 @@ class OwnerDashboardScreen extends StatelessWidget {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ),
-         GestureDetector(
-           onTap: () => _showProfileMenu(context),
-           child: BlocBuilder<ProfileBloc, ProfileState>(
-             builder: (context, profileState) {
-               // If ProfileBloc hasn't loaded this user's profile, request it once
-               if (user != null && (profileState.user == null || profileState.user!.id != user.id)) {
-                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                   context.read<ProfileBloc>().add(ProfileRequested(user.id));
-                 });
-               }
-               final localPath = profileState.localProfileImagePath;
-               ImageProvider? avatarImage;
-               if (localPath != null) {
-                 avatarImage = FileImage(File(localPath));
-               } else if (user?.profileImageUrl != null) {
-                 avatarImage = NetworkImage(user!.profileImageUrl!);
-               }
-               return CircleAvatar(
-                 radius: 24,
-                 backgroundImage: avatarImage,
-                 child: avatarImage == null ? const Icon(Icons.person) : null,
-               );
-             },
-           ),
-         ),
+        GestureDetector(
+          onTap: () => _showProfileMenu(context),
+          child: BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, profileState) {
+              // If ProfileBloc hasn't loaded this user's profile, request it once
+              if (user != null &&
+                  (profileState.user == null ||
+                      profileState.user!.id != user.id)) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.read<ProfileBloc>().add(ProfileRequested(user.id));
+                });
+              }
+              final localPath = profileState.localProfileImagePath;
+              ImageProvider? avatarImage;
+              if (localPath != null) {
+                avatarImage = FileImage(File(localPath));
+              } else if (user?.profileImageUrl != null) {
+                avatarImage = NetworkImage(user!.profileImageUrl!);
+              }
+              return CircleAvatar(
+                radius: 24,
+                backgroundImage: avatarImage,
+                child: avatarImage == null ? const Icon(Icons.person) : null,
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -179,11 +181,7 @@ class OwnerDashboardScreen extends StatelessWidget {
   Widget _buildPetCard(BuildContext context, Pet pet) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          PetDetailScreen.routeName,
-          arguments: pet,
-        );
+        Navigator.pushNamed(context, PetDetailScreen.routeName, arguments: pet);
       },
       child: Container(
         width: 120,
@@ -247,11 +245,13 @@ class OwnerDashboardScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             final upcoming = state.bookings
-                .where((b) =>
-                    b.status == BookingStatus.pending ||
-                    b.status == BookingStatus.accepted)
+                .where(
+                  (b) =>
+                      b.status == BookingStatus.pending ||
+                      b.status == BookingStatus.accepted,
+                )
                 .toList();
-            
+
             if (upcoming.isEmpty) {
               return _buildEmptyState('No upcoming appointments.');
             }
@@ -274,39 +274,45 @@ class OwnerDashboardScreen extends StatelessWidget {
 
   Widget _buildBookingCard(BuildContext context, Booking booking) {
     final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
-    final title = booking.type == BookingType.vet ? 'Vet Appointment' : 'Pet Sitting';
-    
+    final title = booking.type == BookingType.vet
+        ? 'Vet Appointment'
+        : 'Pet Sitting';
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Builder(builder: (ctx) {
-          ImageProvider? petImage;
-          final url = booking.petImageUrl;
-          if (url != null && url.isNotEmpty) {
-            try {
-              final f = File(url);
-              if (f.existsSync()) petImage = FileImage(f);
-              else petImage = NetworkImage(url);
-            } catch (_) {
-              petImage = NetworkImage(url);
+        leading: Builder(
+          builder: (ctx) {
+            ImageProvider? petImage;
+            final url = booking.petImageUrl;
+            if (url != null && url.isNotEmpty) {
+              try {
+                final f = File(url);
+                if (f.existsSync()) {
+                  petImage = FileImage(f);
+                } else {
+                  petImage = NetworkImage(url);
+                }
+              } catch (_) {
+                petImage = NetworkImage(url);
+              }
             }
-          }
-          return CircleAvatar(
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-            backgroundImage: petImage,
-            child: petImage == null
-                ? Icon(
-                    booking.type == BookingType.vet ? Icons.medical_services : Icons.home,
-                    color: Theme.of(context).primaryColor,
-                  )
-                : null,
-          );
-        }),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+            return CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              backgroundImage: petImage,
+              child: petImage == null
+                  ? Icon(
+                      booking.type == BookingType.vet
+                          ? Icons.medical_services
+                          : Icons.home,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
+            );
+          },
         ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(dateFormat.format(booking.date)),
         trailing: Chip(
           label: Text(
@@ -351,10 +357,7 @@ class OwnerDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
-        child: Text(
-          message,
-          style: const TextStyle(color: Colors.grey),
-        ),
+        child: Text(message, style: const TextStyle(color: Colors.grey)),
       ),
     );
   }

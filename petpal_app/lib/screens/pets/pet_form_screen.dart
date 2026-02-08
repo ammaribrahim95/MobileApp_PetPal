@@ -33,7 +33,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
   late TextEditingController _allergiesController;
   late TextEditingController _conditionsController;
   late TextEditingController _historyController;
-  
+
   String _gender = 'Female';
   bool _isVaccinated = false;
   final _uuid = const Uuid();
@@ -50,7 +50,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
     _allergiesController = TextEditingController(text: pet?.allergies);
     _conditionsController = TextEditingController(text: pet?.medicalConditions);
     _historyController = TextEditingController(text: pet?.medicalHistory);
-    
+
     if (pet != null) {
       _gender = pet.gender;
       _isVaccinated = pet.isVaccinated;
@@ -83,7 +83,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     final bloc = context.read<PetBloc>();
     final ownerId = context.read<AuthBloc>().state.user?.id ?? '';
-    
+
     // Use uploaded image URL if available, otherwise keep existing or null
     final imageUrl = bloc.state.uploadedImageUrl ?? widget.pet?.imageUrl;
 
@@ -119,7 +119,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
       body: BlocBuilder<PetBloc, PetState>(
         builder: (context, state) {
           final displayImage = state.uploadedImageUrl ?? widget.pet?.imageUrl;
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Form(
@@ -127,7 +127,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                   Center(
+                  Center(
                     child: GestureDetector(
                       onTap: _uploadImage,
                       child: Stack(
@@ -135,9 +135,11 @@ class _PetFormScreenState extends State<PetFormScreen> {
                           CircleAvatar(
                             radius: 50,
                             backgroundImage: () {
-                              if (displayImage != null && displayImage.isNotEmpty) {
+                              if (displayImage != null &&
+                                  displayImage.isNotEmpty) {
                                 final file = File(displayImage);
-                                if (file.existsSync()) return FileImage(file) as ImageProvider;
+                                if (file.existsSync())
+                                  return FileImage(file) as ImageProvider;
                                 return NetworkImage(displayImage);
                               }
                               return null;
@@ -152,7 +154,11 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             child: CircleAvatar(
                               radius: 16,
                               backgroundColor: Theme.of(context).primaryColor,
-                              child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
@@ -169,13 +175,23 @@ class _PetFormScreenState extends State<PetFormScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: AppTextField(controller: _speciesController, label: 'Species')),
+                      Expanded(
+                        child: AppTextField(
+                          controller: _speciesController,
+                          label: 'Species',
+                        ),
+                      ),
                       const SizedBox(width: 16),
-                      Expanded(child: AppTextField(controller: _breedController, label: 'Breed')),
+                      Expanded(
+                        child: AppTextField(
+                          controller: _breedController,
+                          label: 'Breed',
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   Row(
                     children: [
                       Expanded(
@@ -188,9 +204,16 @@ class _PetFormScreenState extends State<PetFormScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _gender,
-                          decoration: const InputDecoration(labelText: 'Gender'),
-                          items: ['Male', 'Female'].map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                          initialValue: _gender,
+                          decoration: const InputDecoration(
+                            labelText: 'Gender',
+                          ),
+                          items: ['Male', 'Female']
+                              .map(
+                                (g) =>
+                                    DropdownMenuItem(value: g, child: Text(g)),
+                              )
+                              .toList(),
                           onChanged: (val) => setState(() => _gender = val!),
                         ),
                       ),
@@ -204,28 +227,43 @@ class _PetFormScreenState extends State<PetFormScreen> {
                         child: AppTextField(
                           controller: _weightController,
                           label: 'Weight (kg)',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
-                       Expanded(
-                         child: SwitchListTile(
-                          title: const Text('Vaccinated?', style: TextStyle(fontSize: 14)),
+                      Expanded(
+                        child: SwitchListTile(
+                          title: const Text(
+                            'Vaccinated?',
+                            style: TextStyle(fontSize: 14),
+                          ),
                           value: _isVaccinated,
-                          onChanged: (val) => setState(() => _isVaccinated = val),
+                          onChanged: (val) =>
+                              setState(() => _isVaccinated = val),
                           contentPadding: EdgeInsets.zero,
-                         ),
-                       ),
+                        ),
+                      ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  const Text('Medical Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Medical Information',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
 
-                  AppTextField(controller: _allergiesController, label: 'Allergies (Optional)'),
+                  AppTextField(
+                    controller: _allergiesController,
+                    label: 'Allergies (Optional)',
+                  ),
                   const SizedBox(height: 16),
-                  AppTextField(controller: _conditionsController, label: 'Medical Conditions (Optional)'),
+                  AppTextField(
+                    controller: _conditionsController,
+                    label: 'Medical Conditions (Optional)',
+                  ),
                   const SizedBox(height: 16),
                   AppTextField(
                     controller: _historyController,

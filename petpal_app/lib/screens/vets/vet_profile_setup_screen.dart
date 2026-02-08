@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../models/app_user.dart';
 import '../../utils/app_validators.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
@@ -18,13 +15,13 @@ class VetProfileSetupScreen extends StatefulWidget {
 
 class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _clinicNameController = TextEditingController();
   final _clinicRegNumberController = TextEditingController();
   final _clinicDescriptionController = TextEditingController();
   final _workingHoursStartController = TextEditingController();
   final _workingHoursEndController = TextEditingController();
-  
+
   // Specializations
   final List<String> _allSpecializations = [
     'General Practice',
@@ -33,12 +30,20 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
     'Exotic Animals',
     'Emergency Care',
     'Dentistry',
-    'Internal Medicine'
+    'Internal Medicine',
   ];
   final List<String> _selectedSpecializations = [];
 
   // Working Days
-  final List<String> _daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _daysOfWeek = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
   final List<String> _selectedDays = [];
 
   @override
@@ -55,7 +60,9 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedSpecializations.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one specialization')),
+        const SnackBar(
+          content: Text('Please select at least one specialization'),
+        ),
       );
       return;
     }
@@ -67,15 +74,15 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
     }
 
     // In a real app, we would update the user profile in Firestore here.
-    // Since AuthBloc handles the initial registration, we might need a separate event 
+    // Since AuthBloc handles the initial registration, we might need a separate event
     // or ProfileBloc to update the "Vet" specific fields.
     // For this prompt, assume we just complete the flow and go to Home.
-    
+
     // Dispatch an event to update user profile with vet details
     // context.read<AuthBloc>().add(UpdateVetProfile(...));
-    
+
     // For now, navigate to Home as a placeholder for completion
-     Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+    Navigator.pushReplacementNamed(context, HomeScreen.routeName);
   }
 
   void _toggleSpecialization(String spec) {
@@ -87,7 +94,7 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
       }
     });
   }
-  
+
   void _toggleDay(String day) {
     setState(() {
       if (_selectedDays.contains(day)) {
@@ -128,22 +135,25 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
               AppTextField(
                 controller: _clinicNameController,
                 label: 'Clinic Name',
-                validator: (v) => AppValidators.required(v, fieldName: 'Clinic Name'),
+                validator: (v) =>
+                    AppValidators.required(v, fieldName: 'Clinic Name'),
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _clinicRegNumberController,
                 label: 'Clinic Registration Number',
-                validator: (v) => AppValidators.required(v, fieldName: 'Reg Number'),
+                validator: (v) =>
+                    AppValidators.required(v, fieldName: 'Reg Number'),
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _clinicDescriptionController,
                 label: 'Clinic Description',
                 maxLines: 3,
-                validator: (v) => AppValidators.required(v, fieldName: 'Description'),
+                validator: (v) =>
+                    AppValidators.required(v, fieldName: 'Description'),
               ),
-              
+
               const SizedBox(height: 24),
               const Text(
                 'Specialization',
@@ -179,7 +189,7 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
                   );
                 }).toList(),
               ),
-              
+
               const SizedBox(height: 16),
               const SizedBox(height: 16),
               Row(
@@ -191,7 +201,10 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
                         child: AppTextField(
                           controller: _workingHoursStartController,
                           label: 'Start Time',
-                          validator: (v) => AppValidators.required(v, fieldName: 'Start Time'),
+                          validator: (v) => AppValidators.required(
+                            v,
+                            fieldName: 'Start Time',
+                          ),
                         ),
                       ),
                     ),
@@ -204,7 +217,8 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
                         child: AppTextField(
                           controller: _workingHoursEndController,
                           label: 'End Time',
-                          validator: (v) => AppValidators.required(v, fieldName: 'End Time'),
+                          validator: (v) =>
+                              AppValidators.required(v, fieldName: 'End Time'),
                         ),
                       ),
                     ),
@@ -213,10 +227,7 @@ class _VetProfileSetupScreenState extends State<VetProfileSetupScreen> {
               ),
 
               const SizedBox(height: 32),
-              PrimaryButton(
-                label: 'Complete Setup',
-                onPressed: _submit,
-              ),
+              PrimaryButton(label: 'Complete Setup', onPressed: _submit),
             ],
           ),
         ),

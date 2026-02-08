@@ -42,7 +42,10 @@ class _VetBookingScreenState extends State<VetBookingScreen> {
   }
 
   Future<void> _pickTime(bool isStart) async {
-    final t = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
     if (t == null) return;
     setState(() {
       if (isStart) {
@@ -62,29 +65,34 @@ class _VetBookingScreenState extends State<VetBookingScreen> {
     final user = context.read<AuthBloc>().state.user;
     if (user == null || _selectedPetId == null) return;
     if (_startTime == null || _endTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select start and end time')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select start and end time')),
+      );
       return;
     }
     // ensure end is after start
     final startMinutes = _startTime!.hour * 60 + _startTime!.minute;
     final endMinutes = _endTime!.hour * 60 + _endTime!.minute;
     if (endMinutes <= startMinutes) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('End time must be after start time')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End time must be after start time')),
+      );
       return;
     }
-    
+
     // Find the selected pet
     final selectedPet = context.read<PetBloc>().state.pets.firstWhere(
       (pet) => pet.id == _selectedPetId,
     );
-    
+
     final booking = Booking.vet(
       id: '',
       ownerId: user.id,
       petId: _selectedPetId!,
       vetId: vet.id,
       date: _selectedDate,
-      time: '${_formatTimeOfDay(_startTime, context)} - ${_formatTimeOfDay(_endTime, context)}',
+      time:
+          '${_formatTimeOfDay(_startTime, context)} - ${_formatTimeOfDay(_endTime, context)}',
       notes: _notesController.text,
       status: BookingStatus.pending,
       petName: selectedPet.name,
@@ -128,40 +136,50 @@ class _VetBookingScreenState extends State<VetBookingScreen> {
             const SizedBox(height: 16),
             ListTile(
               title: Text('Date'),
-              subtitle: Text('${_selectedDate.toLocal().toIso8601String().split('T')[0]}'),
+              subtitle: Text(
+                _selectedDate.toLocal().toIso8601String().split('T')[0],
+              ),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,
             ),
             const SizedBox(height: 8),
-            Row(children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _pickTime(true),
-                  icon: const Icon(Icons.schedule),
-                  label: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Start'),
-                      Text(_formatTimeOfDay(_startTime, context), style: Theme.of(context).textTheme.bodyMedium),
-                    ],
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickTime(true),
+                    icon: const Icon(Icons.schedule),
+                    label: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Start'),
+                        Text(
+                          _formatTimeOfDay(_startTime, context),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _pickTime(false),
-                  icon: const Icon(Icons.schedule),
-                  label: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('End'),
-                      Text(_formatTimeOfDay(_endTime, context), style: Theme.of(context).textTheme.bodyMedium),
-                    ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickTime(false),
+                    icon: const Icon(Icons.schedule),
+                    label: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('End'),
+                        Text(
+                          _formatTimeOfDay(_endTime, context),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: _notesController,

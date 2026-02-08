@@ -2,16 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share_plus/share_plus.dart';
-
-import '../../blocs/pet/pet_bloc.dart';
-import '../../models/pet.dart';
-import '../../screens/reports/activity_logs_screen.dart';
-import '../../utils/dialog_utils.dart';
-import 'pet_form_screen.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/pet/pet_bloc.dart';
 import '../../models/pet.dart';
@@ -33,10 +23,17 @@ class PetDetailScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.black), // Ensure visibility on light bg
+        leading: const BackButton(
+          color: Colors.black,
+        ), // Ensure visibility on light bg
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 60, 24, 24), // Add top padding for AppBar
+        padding: const EdgeInsets.fromLTRB(
+          24,
+          60,
+          24,
+          24,
+        ), // Add top padding for AppBar
         child: Column(
           children: [
             _buildPetHeader(pet),
@@ -119,7 +116,9 @@ class PetDetailScreen extends StatelessWidget {
                 _buildInfoItem(Icons.cake, 'Age', '${pet.age} years'),
                 _buildContainerDivider(),
                 _buildInfoItem(
-                  pet.gender.toLowerCase() == 'male' ? Icons.male : Icons.female,
+                  pet.gender.toLowerCase() == 'male'
+                      ? Icons.male
+                      : Icons.female,
                   'Gender',
                   pet.gender,
                 ),
@@ -129,7 +128,11 @@ class PetDetailScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildInfoItem(Icons.monitor_weight, 'Weight', '${pet.weight} kg'),
+                _buildInfoItem(
+                  Icons.monitor_weight,
+                  'Weight',
+                  '${pet.weight} kg',
+                ),
                 _buildContainerDivider(),
                 _buildInfoItem(
                   pet.isVaccinated ? Icons.check_circle : Icons.cancel,
@@ -146,11 +149,7 @@ class PetDetailScreen extends StatelessWidget {
   }
 
   Widget _buildContainerDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.grey[300],
-    );
+    return Container(height: 40, width: 1, color: Colors.grey[300]);
   }
 
   Widget _buildInfoItem(
@@ -174,10 +173,7 @@ class PetDetailScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -194,9 +190,9 @@ class PetDetailScreen extends StatelessWidget {
           children: [
             Text(
               'Medical History',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildMedicalRow('Allergies', pet.allergies),

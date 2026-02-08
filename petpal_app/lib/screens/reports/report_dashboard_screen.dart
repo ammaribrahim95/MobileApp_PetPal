@@ -43,7 +43,12 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +57,10 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)),
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.15),
+              child: Icon(icon, color: color),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -98,9 +106,14 @@ class _PetHealthReportState extends State<_PetHealthReport> {
     final pets = context.watch<PetBloc>().state.pets;
     _selectedPetId ??= pets.isNotEmpty ? pets.first.id : null;
 
-    Future<String?> _saveBytesToDownloads(Uint8List bytes, String filename) async {
+    Future<String?> saveBytesToDownloads(
+      Uint8List bytes,
+      String filename,
+    ) async {
       try {
-        final dirs = await getExternalStorageDirectories(type: StorageDirectory.downloads);
+        final dirs = await getExternalStorageDirectories(
+          type: StorageDirectory.downloads,
+        );
         if (dirs != null && dirs.isNotEmpty) {
           final dir = dirs.first;
           final file = File('${dir.path}/$filename');
@@ -122,10 +135,14 @@ class _PetHealthReportState extends State<_PetHealthReport> {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: BlocListener<ReportBloc, ReportState>(
-          listenWhen: (previous, current) => previous.exportedBytes != current.exportedBytes || previous.errorMessage != current.errorMessage,
+          listenWhen: (previous, current) =>
+              previous.exportedBytes != current.exportedBytes ||
+              previous.errorMessage != current.errorMessage,
           listener: (context, state) async {
             if (state.errorMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
             }
             if (state.exportedBytes != null && !state.isExporting) {
               final bytes = state.exportedBytes!;
@@ -133,37 +150,77 @@ class _PetHealthReportState extends State<_PetHealthReport> {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('Report ready'),
-                  content: const Text('Would you like to share the report or save it to Downloads?'),
+                  content: const Text(
+                    'Would you like to share the report or save it to Downloads?',
+                  ),
                   actions: [
-                    TextButton(onPressed: () => Navigator.of(ctx).pop('share'), child: const Text('Share')),
-                    TextButton(onPressed: () => Navigator.of(ctx).pop('save'), child: const Text('Save to Downloads')),
-                    TextButton(onPressed: () => Navigator.of(ctx).pop(null), child: const Text('Cancel')),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop('share'),
+                      child: const Text('Share'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop('save'),
+                      child: const Text('Save to Downloads'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(null),
+                      child: const Text('Cancel'),
+                    ),
                   ],
                 ),
               );
 
               if (choice == 'share') {
-                await Printing.sharePdf(bytes: bytes, filename: 'pet-report.pdf');
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share dialog opened.')));
+                await Printing.sharePdf(
+                  bytes: bytes,
+                  filename: 'pet-report.pdf',
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Share dialog opened.')),
+                );
               } else if (choice == 'save') {
                 try {
                   final docDir = await getApplicationDocumentsDirectory();
                   final localFile = File('${docDir.path}/pet-report.pdf');
                   await localFile.writeAsBytes(bytes);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Report saved locally: ${localFile.path}')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Report saved locally: ${localFile.path}'),
+                    ),
+                  );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Local save failed: ${e.toString()}')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Local save failed: ${e.toString()}'),
+                    ),
+                  );
                 }
 
                 try {
-                  await FileSaver.instance.saveFile(name: 'pet-report', bytes: bytes, ext: 'pdf', mimeType: MimeType.pdf);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Report saved (via FileSaver).')));
+                  await FileSaver.instance.saveFile(
+                    name: 'pet-report',
+                    bytes: bytes,
+                    ext: 'pdf',
+                    mimeType: MimeType.pdf,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Report saved (via FileSaver).'),
+                    ),
+                  );
                 } catch (_) {
-                  final savedPath = await _saveBytesToDownloads(bytes, 'pet-report.pdf');
+                  final savedPath = await saveBytesToDownloads(
+                    bytes,
+                    'pet-report.pdf',
+                  );
                   if (savedPath != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Report saved to: $savedPath')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Report saved to: $savedPath')),
+                    );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Save failed.')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Save failed.')),
+                    );
                   }
                 }
               }
@@ -176,71 +233,142 @@ class _PetHealthReportState extends State<_PetHealthReport> {
                 initialValue: _selectedPetId,
                 decoration: const InputDecoration(labelText: 'Pet'),
                 items: pets
-                    .map((pet) => DropdownMenuItem(value: pet.id, child: Text(pet.name)))
+                    .map(
+                      (pet) => DropdownMenuItem(
+                        value: pet.id,
+                        child: Text(pet.name),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) => setState(() => _selectedPetId = value),
               ),
               const SizedBox(height: 16),
-              PrimaryButton(label: 'Generate report', onPressed: _generateReport),
+              PrimaryButton(
+                label: 'Generate report',
+                onPressed: _generateReport,
+              ),
               const SizedBox(height: 16),
 
               // Report preview area — appears after generation
-              BlocBuilder<ReportBloc, ReportState>(builder: (context, state) {
-                if (state.isLoading) return const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()));
-                if (state.reportData == null) return const Padding(padding: EdgeInsets.all(24), child: Text('Select a pet to generate detailed health insights.'));
-                if (!state.reportData!.containsKey('pet')) return const Padding(padding: EdgeInsets.all(24), child: Text('Invalid report data.'));
+              BlocBuilder<ReportBloc, ReportState>(
+                builder: (context, state) {
+                  if (state.isLoading)
+                    return const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  if (state.reportData == null)
+                    return const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'Select a pet to generate detailed health insights.',
+                      ),
+                    );
+                  if (!state.reportData!.containsKey('pet'))
+                    return const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text('Invalid report data.'),
+                    );
 
-                final pet = state.reportData!['pet'] as Pet;
-                final bookings = state.reportData!['bookings'] as List<Booking>;
-                final activities = state.reportData!['activities'] as List;
+                  final pet = state.reportData!['pet'] as Pet;
+                  final bookings =
+                      state.reportData!['bookings'] as List<Booking>;
+                  final activities = state.reportData!['activities'] as List;
 
-                final cards = [
-                  _StatCard(title: 'Total Appointments', value: bookings.length.toString(), icon: Icons.calendar_today, color: Colors.blue),
-                  _StatCard(title: 'Upcoming', value: bookings.where((b) => b.date.isAfter(DateTime.now())).length.toString(), icon: Icons.schedule, color: Colors.orange),
-                  _StatCard(title: 'Activity Logs', value: activities.length.toString(), icon: Icons.list_alt, color: Colors.green),
-                ];
+                  final cards = [
+                    _StatCard(
+                      title: 'Total Appointments',
+                      value: bookings.length.toString(),
+                      icon: Icons.calendar_today,
+                      color: Colors.blue,
+                    ),
+                    _StatCard(
+                      title: 'Upcoming',
+                      value: bookings
+                          .where((b) => b.date.isAfter(DateTime.now()))
+                          .length
+                          .toString(),
+                      icon: Icons.schedule,
+                      color: Colors.orange,
+                    ),
+                    _StatCard(
+                      title: 'Activity Logs',
+                      value: activities.length.toString(),
+                      icon: Icons.list_alt,
+                      color: Colors.green,
+                    ),
+                  ];
 
-                return Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Pet: ${pet.name}', style: Theme.of(context).textTheme.titleLarge),
-                      Text('Species: ${pet.species}'),
-                      const SizedBox(height: 12),
+                  return Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pet: ${pet.name}',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text('Species: ${pet.species}'),
+                          const SizedBox(height: 12),
 
-                      LayoutBuilder(builder: (context, constraints) {
-                        final isWide = constraints.maxWidth >= 640;
-                        final crossAxisCount = isWide ? 3 : 1;
-                        final cardHeight = 120.0;
-                        final childAspectRatio = isWide ? (constraints.maxWidth / crossAxisCount) / cardHeight : constraints.maxWidth / cardHeight;
-                        return GridView.count(
-                          crossAxisCount: crossAxisCount,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: childAspectRatio,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          children: cards,
-                        );
-                      }),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isWide = constraints.maxWidth >= 640;
+                              final crossAxisCount = isWide ? 3 : 1;
+                              final cardHeight = 120.0;
+                              final childAspectRatio = isWide
+                                  ? (constraints.maxWidth / crossAxisCount) /
+                                        cardHeight
+                                  : constraints.maxWidth / cardHeight;
+                              return GridView.count(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: childAspectRatio,
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                children: cards,
+                              );
+                            },
+                          ),
 
-                      const SizedBox(height: 16),
-                      Text('Recent Appointments', style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      ...bookings.take(5).map((b) => Card(
-                            child: ListTile(
-                              title: Text(b.petName.isNotEmpty ? b.petName : pet.name),
-                              subtitle: Text('${b.date.toLocal()} • ${b.status.name}'),
-                              trailing: Text(b.time ?? ''),
-                            ),
-                          )),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Recent Appointments',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          ...bookings
+                              .take(5)
+                              .map(
+                                (b) => Card(
+                                  child: ListTile(
+                                    title: Text(
+                                      b.petName.isNotEmpty
+                                          ? b.petName
+                                          : pet.name,
+                                    ),
+                                    subtitle: Text(
+                                      '${b.date.toLocal()} • ${b.status.name}',
+                                    ),
+                                    trailing: Text(b.time ?? ''),
+                                  ),
+                                ),
+                              ),
 
-                      const SizedBox(height: 16),
-                      PrimaryButton(label: 'Export as PDF', isLoading: state.isExporting, onPressed: _exportReport),
-                    ]),
-                  ),
-                );
-              }),
+                          const SizedBox(height: 16),
+                          PrimaryButton(
+                            label: 'Export as PDF',
+                            isLoading: state.isExporting,
+                            onPressed: _exportReport,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),

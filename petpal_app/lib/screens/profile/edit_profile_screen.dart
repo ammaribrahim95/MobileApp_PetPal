@@ -6,7 +6,11 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key, required this.user, required this.onSave});
+  const EditProfileScreen({
+    super.key,
+    required this.user,
+    required this.onSave,
+  });
 
   static const routeName = '/profile/edit';
 
@@ -26,7 +30,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Vet Data
   List<String> _selectedSpecializations = [];
-  
+
   // Shared Availability (Vet & Sitter)
   List<String> _selectedDays = [];
   TimeOfDay? _startTime;
@@ -36,7 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _experienceController; // Description
   late TextEditingController _pricingController;
   late TextEditingController _yearsExpController;
-  
+
   String? _selectedState; // For Service Area
 
   List<String> _selectedPetTypes = [];
@@ -49,20 +53,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     'Exotic Animals',
     'Emergency Care',
     'Dentistry',
-    'Internal Medicine'
+    'Internal Medicine',
   ];
 
-  final List<String> _daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _daysOfWeek = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
 
   // Sitter Constants
   final List<String> _malaysianStates = [
-    'Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan',
-    'Pahang', 'Perak', 'Perlis', 'Pulau Pinang', 'Sabah', 'Sarawak',
-    'Selangor', 'Terengganu', 'Kuala Lumpur', 'Labuan', 'Putrajaya'
+    'Johor',
+    'Kedah',
+    'Kelantan',
+    'Melaka',
+    'Negeri Sembilan',
+    'Pahang',
+    'Perak',
+    'Perlis',
+    'Pulau Pinang',
+    'Sabah',
+    'Sarawak',
+    'Selangor',
+    'Terengganu',
+    'Kuala Lumpur',
+    'Labuan',
+    'Putrajaya',
   ];
 
   final List<String> _petTypes = ['Dog', 'Cat', 'Rabbit', 'Bird', 'Other'];
-  final List<String> _sitterServices = ['Day Care', 'Overnight Sitting', 'Home Visit', 'Boarding'];
+  final List<String> _sitterServices = [
+    'Day Care',
+    'Overnight Sitting',
+    'Home Visit',
+    'Boarding',
+  ];
 
   @override
   void initState() {
@@ -85,22 +115,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _initVetData(AppUser user) {
     if (user.specialization != null && user.specialization!.isNotEmpty) {
-      _selectedSpecializations = user.specialization!.split(',').map((e) => e.trim()).toList();
+      _selectedSpecializations = user.specialization!
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
     }
-    
+
     // Parse Vet Schedule
     if (user.schedule != null && user.schedule!.isNotEmpty) {
       final parts = user.schedule!.split('|');
       if (parts.isNotEmpty) {
         final daysStr = parts[0];
         _selectedDays = daysStr.split(',').map((e) => e.trim()).toList();
-        
+
         if (parts.length > 1) {
           final timePart = parts[1].trim();
           final times = timePart.split('-');
           if (times.length == 2) {
-             _startTime = _parseTime(times[0].trim());
-             _endTime = _parseTime(times[1].trim());
+            _startTime = _parseTime(times[0].trim());
+            _endTime = _parseTime(times[1].trim());
           }
         }
       }
@@ -110,8 +143,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _initSitterData(AppUser user) {
     _experienceController = TextEditingController(text: user.experience);
     _pricingController = TextEditingController(text: user.pricing?.toString());
-    _yearsExpController = TextEditingController(text: user.yearsOfExperience?.toString());
-    
+    _yearsExpController = TextEditingController(
+      text: user.yearsOfExperience?.toString(),
+    );
+
     _selectedState = user.serviceArea; // Assuming serviceArea stores state name
 
     if (user.petTypesAccepted != null) {
@@ -123,7 +158,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (user.availableDays != null) {
       _selectedDays = List.from(user.availableDays!);
     }
-    
+
     if (user.availableHours != null) {
       if (user.availableHours!.containsKey('start')) {
         _startTime = _parseTime(user.availableHours!['start']!);
@@ -140,7 +175,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (parts.length >= 2) {
         int hour = int.parse(parts[0]);
         int minute = int.parse(parts[1].split(' ')[0]);
-        
+
         if (s.toLowerCase().contains('pm') && hour < 12) hour += 12;
         if (s.toLowerCase().contains('am') && hour == 12) hour = 0;
 
@@ -167,7 +202,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
-    
+
     AppUser updated = widget.user.copyWith(
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
@@ -178,12 +213,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (widget.user.role == UserRole.vet) {
       // Vet Save Logic
       final specString = _selectedSpecializations.join(', ');
-      
+
       String scheduleString = '';
       if (_selectedDays.isNotEmpty) {
         scheduleString += _selectedDays.join(', ');
         if (_startTime != null && _endTime != null) {
-          scheduleString += ' | ${_formatTime(_startTime!)} - ${_formatTime(_endTime!)}';
+          scheduleString +=
+              ' | ${_formatTime(_startTime!)} - ${_formatTime(_endTime!)}';
         }
       }
 
@@ -195,8 +231,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } else if (widget.user.role == UserRole.sitter) {
       // Sitter Save Logic
       if (_selectedState == null) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a service area (State)')));
-         return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a service area (State)')),
+        );
+        return;
       }
 
       updated = updated.copyWith(
@@ -245,12 +283,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _selectStartTime() async {
-    final picked = await showTimePicker(context: context, initialTime: _startTime ?? TimeOfDay.now());
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _startTime ?? TimeOfDay.now(),
+    );
     if (picked != null) setState(() => _startTime = picked);
   }
 
   Future<void> _selectEndTime() async {
-    final picked = await showTimePicker(context: context, initialTime: _endTime ?? TimeOfDay.now());
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _endTime ?? TimeOfDay.now(),
+    );
     if (picked != null) setState(() => _endTime = picked);
   }
 
@@ -267,7 +311,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- Generic Info ---
-              const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Personal Information',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _nameController,
@@ -282,13 +329,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
-              AppTextField(
-                controller: _addressController,
-                label: 'Address',
-              ),
+              AppTextField(controller: _addressController, label: 'Address'),
               const SizedBox(height: 16),
               if (user.role == UserRole.vet)
-                 _buildMapPlaceholder(_addressController.text),
+                _buildMapPlaceholder(_addressController.text),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _birthdayController,
@@ -298,9 +342,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // --- Vet Specific ---
               if (user.role == UserRole.vet) ...[
-                const Text('Professional Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Professional Details',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16),
-                const Text('Specialization', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text(
+                  'Specialization',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -313,88 +363,110 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     );
                   }).toList(),
                 ),
-                
+
                 const SizedBox(height: 24),
-                const Text('Working Hours', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text(
+                  'Working Hours',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 8),
                 _buildAvailabilitySelector(),
               ],
 
               // --- Sitter Specific ---
               if (user.role == UserRole.sitter) ...[
-                const Text('Professional Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Professional Details',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16),
-                
+
                 AppTextField(
                   controller: _experienceController,
                   label: 'Experience Description',
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
-                
+
                 AppTextField(
                   controller: _yearsExpController,
                   label: 'Years of Experience',
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
-                
+
                 AppTextField(
                   controller: _pricingController,
                   label: 'Hourly Rate (RM)',
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
-                
+
                 DropdownButtonFormField<String>(
-                  value: _selectedState,
+                  initialValue: _selectedState,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Service Area (State)',
                     border: OutlineInputBorder(),
                   ),
                   items: _malaysianStates.map((state) {
-                    return DropdownMenuItem(child: Text(state), value: state);
+                    return DropdownMenuItem(value: state, child: Text(state));
                   }).toList(),
                   onChanged: (val) => setState(() => _selectedState = val),
                   validator: (v) => v == null ? 'Please select a state' : null,
                 ),
                 const SizedBox(height: 24),
 
-                const Text('Pet Types Accepted', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Pet Types Accepted',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: _petTypes.map((type) => FilterChip(
-                    label: Text(type),
-                    selected: _selectedPetTypes.contains(type),
-                    onSelected: (_) => _toggleListItem(_selectedPetTypes, type),
-                  )).toList(),
+                  children: _petTypes
+                      .map(
+                        (type) => FilterChip(
+                          label: Text(type),
+                          selected: _selectedPetTypes.contains(type),
+                          onSelected: (_) =>
+                              _toggleListItem(_selectedPetTypes, type),
+                        ),
+                      )
+                      .toList(),
                 ),
 
                 const SizedBox(height: 24),
-                const Text('Services Provided', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Services Provided',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: _sitterServices.map((s) => FilterChip(
-                    label: Text(s),
-                    selected: _selectedServices.contains(s),
-                    onSelected: (_) => _toggleListItem(_selectedServices, s),
-                  )).toList(),
+                  children: _sitterServices
+                      .map(
+                        (s) => FilterChip(
+                          label: Text(s),
+                          selected: _selectedServices.contains(s),
+                          onSelected: (_) =>
+                              _toggleListItem(_selectedServices, s),
+                        ),
+                      )
+                      .toList(),
                 ),
 
                 const SizedBox(height: 24),
-                const Text('Work Availability', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text(
+                  'Work Availability',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 8),
                 _buildAvailabilitySelector(),
               ],
 
               const SizedBox(height: 48),
-              PrimaryButton(
-                label: 'Save Changes',
-                onPressed: _save,
-              ),
+              PrimaryButton(label: 'Save Changes', onPressed: _save),
             ],
           ),
         ),
@@ -453,33 +525,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-           Column(
-             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-             children: List.generate(5, (_) => const Divider(color: Colors.white)),
-           ),
-           Row(
-             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-             children: List.generate(5, (_) => const VerticalDivider(color: Colors.white)),
-           ),
-           Column(
-             mainAxisAlignment: MainAxisAlignment.center,
-             children: [
-               const Icon(Icons.location_on, color: Colors.red, size: 40),
-               const SizedBox(height: 4),
-               Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                 decoration: BoxDecoration(
-                   color: Colors.white,
-                   borderRadius: BorderRadius.circular(4),
-                   boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                 ),
-                 child: Text(
-                   address.isEmpty ? 'Select Address' : address,
-                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                 ),
-               )
-             ],
-           ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              5,
+              (_) => const Divider(color: Colors.white),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(
+              5,
+              (_) => const VerticalDivider(color: Colors.white),
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.location_on, color: Colors.red, size: 40),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 4),
+                  ],
+                ),
+                child: Text(
+                  address.isEmpty ? 'Select Address' : address,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
